@@ -3002,7 +3002,7 @@ fseg_free_page_low(
 
 	if (ahi) {
 		btr_search_drop_page_hash_when_freed(
-			page_id_t(space->id, offset), page_size);
+			page_id_t(space->id, offset));
 	}
 #endif /* BTR_CUR_HASH_ADAPT */
 
@@ -3206,8 +3206,7 @@ fseg_free_extent(
 
 				btr_search_drop_page_hash_when_freed(
 					page_id_t(space->id,
-						  first_page_in_extent + i),
-					page_size);
+						  first_page_in_extent + i));
 			}
 		}
 	}
