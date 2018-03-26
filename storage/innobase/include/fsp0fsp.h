@@ -398,14 +398,6 @@ void fsp_header_init(fil_space_t* space, ulint size, mtr_t* mtr)
 	MY_ATTRIBUTE((nonnull));
 
 /**********************************************************************//**
-Increases the space size field of a space. */
-void
-fsp_header_inc_size(
-/*================*/
-	ulint	space_id,	/*!< in: space id */
-	ulint	size_inc,	/*!< in: size increment in pages */
-	mtr_t*	mtr);		/*!< in/out: mini-transaction */
-/**********************************************************************//**
 Creates a new segment.
 @return the block where the segment header is placed, x-latched, NULL
 if could not create segment because of lack of space */

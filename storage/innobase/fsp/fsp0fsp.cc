@@ -810,35 +810,6 @@ fsp_header_get_space_id(
 }
 
 /**********************************************************************//**
-Increases the space size field of a space. */
-void
-fsp_header_inc_size(
-/*================*/
-	ulint	space_id,	/*!< in: space id */
-	ulint	size_inc,	/*!< in: size increment in pages */
-	mtr_t*	mtr)		/*!< in/out: mini-transaction */
-{
-	fsp_header_t*	header;
-	ulint		size;
-
-	ut_ad(mtr);
-
-	fil_space_t*	space = mtr_x_lock_space(space_id, mtr);
-	ut_d(fsp_space_modify_check(space, mtr));
-
-	header = fsp_get_space_header(
-		space, page_size_t(space->flags), mtr);
-
-	size = mach_read_from_4(header + FSP_SIZE);
-	ut_ad(size == space->size_in_header);
-
-	size += size_inc;
-
-	mlog_write_ulint(header + FSP_SIZE, size, MLOG_4BYTES, mtr);
-	space->size_in_header = size;
-}
-
-/**********************************************************************//**
 Gets the size of the system tablespace from the tablespace header.  If
 we do not have an auto-extending data file, this should be equal to
 the size of the data files.  If there is an auto-extending data file,

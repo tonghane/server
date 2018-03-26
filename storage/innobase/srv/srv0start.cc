@@ -2256,8 +2256,20 @@ files_checked:
 
 			if (sum_of_new_sizes > 0) {
 				/* New data file(s) were added */
+				fil_space_t* space = fil_system.sys_space;
 				mtr.start();
-				fsp_header_inc_size(0, sum_of_new_sizes, &mtr);
+				buf_block_t* block = buf_page_get(
+					page_id_t(0, 0), univ_page_size,
+					RW_SX_LATCH, &mtr);
+				ulint size = mach_read_from_4(
+					FSP_HEADER_OFFSET + FSP_SIZE
+					+ block->frame);
+				ut_ad(size == space->size_in_header);
+				size += sum_of_new_sizes;
+				mlog_write_ulint(FSP_HEADER_OFFSET + FSP_SIZE
+						 + block->frame, size,
+						 MLOG_4BYTES, &mtr);
+				space->size_in_header = size;
 				mtr.commit();
 				/* Immediately write the log record about
 				increased tablespace size to disk, so that it
