@@ -1074,7 +1074,9 @@ srv_undo_tablespaces_init(bool create_new_db)
 
 			undo::Truncate::add_space_to_trunc_list(*it);
 
-			fsp_header_init(mtr_x_lock_space(*it, &mtr),
+			fil_space_t* space = mtr_x_lock_space(*it, &mtr);
+
+			fsp_header_init(space,
 					SRV_UNDO_TABLESPACE_SIZE_IN_PAGES,
 					&mtr);
 
@@ -1082,7 +1084,7 @@ srv_undo_tablespaces_init(bool create_new_db)
 				if (trx_sysf_rseg_get_space(sys_header, i)
 				    == *it) {
 					trx_rseg_header_create(
-						*it, i, sys_header, &mtr);
+						space, i, sys_header, &mtr);
 				}
 			}
 
