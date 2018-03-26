@@ -1233,13 +1233,6 @@ fil_space_release_free_extents(
 /*===========================*/
 	ulint	id,		/*!< in: space id */
 	ulint	n_reserved);	/*!< in: how many one reserved */
-/*******************************************************************//**
-Gets the number of reserved extents. If the database is silent, this number
-should be zero. */
-ulint
-fil_space_get_n_reserved_extents(
-/*=============================*/
-	ulint	id);		/*!< in: space id */
 
 /** Reads or writes data. This operation could be asynchronous (aio).
 

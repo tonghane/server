@@ -4843,32 +4843,6 @@ fil_space_release_free_extents(
 	mutex_exit(&fil_system.mutex);
 }
 
-/*******************************************************************//**
-Gets the number of reserved extents. If the database is silent, this number
-should be zero. */
-ulint
-fil_space_get_n_reserved_extents(
-/*=============================*/
-	ulint	id)		/*!< in: space id */
-{
-	fil_space_t*	space;
-	ulint		n;
-
-	ut_ad(fil_system.is_initialised());
-
-	mutex_enter(&fil_system.mutex);
-
-	space = fil_space_get_by_id(id);
-
-	ut_a(space);
-
-	n = space->n_reserved_extents;
-
-	mutex_exit(&fil_system.mutex);
-
-	return(n);
-}
-
 /*============================ FILE I/O ================================*/
 
 /********************************************************************//**
