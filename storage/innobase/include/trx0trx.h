@@ -390,7 +390,6 @@ trx_state_eq(
 # ifdef UNIV_DEBUG
 /**********************************************************************//**
 Asserts that a transaction has been started.
-The caller must hold trx_sys.mutex.
 @return TRUE if started */
 ibool
 trx_assert_started(

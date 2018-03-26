@@ -2140,15 +2140,12 @@ trx_print(
 #ifdef UNIV_DEBUG
 /**********************************************************************//**
 Asserts that a transaction has been started.
-The caller must hold trx_sys.mutex.
 @return TRUE if started */
 ibool
 trx_assert_started(
 /*===============*/
 	const trx_t*	trx)	/*!< in: transaction */
 {
-	ut_ad(mutex_own(&trx_sys.mutex));
-
 	/* Non-locking autocommits should not hold any locks and this
 	function is only called from the locking code. */
 	check_trx_state(trx);
