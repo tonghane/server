@@ -1188,7 +1188,7 @@ srv_open_tmp_tablespace(bool create_new_db)
 		ib::error() << "Unable to create the shared "
 			<< srv_tmp_space.name();
 
-	} else if (fil_space_open(srv_tmp_space.name())) {
+	} else if (fil_system.temp_space->open()) {
 		/* Initialize the header page */
 		mtr_t mtr;
 		mtr.start();
@@ -1200,8 +1200,8 @@ srv_open_tmp_tablespace(bool create_new_db)
 		mtr.commit();
 	} else {
 		/* This file was just opened in the code above! */
-		ib::error() << "The " << srv_tmp_space.name()
-			    << " data file cannot be re-opened"
+		ib::error() << "The innodb_temporary"
+			" data file cannot be re-opened"
 			" after check_file_spec() succeeded!";
 		err = DB_ERROR;
 	}

@@ -204,6 +204,12 @@ struct fil_space_t {
 		return !atomic_write_supported
 			&& srv_use_doublewrite_buf && buf_dblwr;
 	}
+
+	/** Open each file. Only invoked on fil_system.temp_space.
+	@return whether all files were opened */
+	bool open();
+	/** Close each file. Only invoked on fil_system.temp_space. */
+	void close();
 };
 
 /** Value of fil_space_t::magic_n */
@@ -685,19 +691,6 @@ ulint
 fil_space_get_flags(
 /*================*/
 	ulint	id);	/*!< in: space id */
-
-/** Open each fil_node_t of a named fil_space_t if not already open.
-@param[in]	name	Tablespace name
-@return true if all file nodes are opened. */
-bool
-fil_space_open(
-	const char*	name);
-
-/** Close each fil_node_t of a named fil_space_t if open.
-@param[in]	name	Tablespace name */
-void
-fil_space_close(
-	const char*	name);
 
 /** Returns the page size of the space and whether it is compressed or not.
 The tablespace must be cached in the memory cache.

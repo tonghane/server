@@ -1814,58 +1814,41 @@ fil_space_get_flags(
 	return(flags);
 }
 
-/** Open each fil_node_t of a named fil_space_t if not already open.
-@param[in]	name	Tablespace name
-@return true if all nodes are open  */
-bool
-fil_space_open(
-	const char*	name)
+/** Open each file. Only invoked on fil_system.temp_space.
+@return whether all files were opened */
+bool fil_space_t::open()
 {
-	ut_ad(fil_system.is_initialised());
-
 	mutex_enter(&fil_system.mutex);
+	ut_ad(this == fil_system.temp_space
+	      || srv_operation == SRV_OPERATION_BACKUP
+	      || srv_operation == SRV_OPERATION_RESTORE
+	      || srv_operation == SRV_OPERATION_RESTORE_DELTA);
 
-	fil_space_t*	space = fil_space_get_by_name(name);
-	fil_node_t*	node;
-
-	for (node = UT_LIST_GET_FIRST(space->chain);
+	for (fil_node_t* node = UT_LIST_GET_FIRST(chain);
 	     node != NULL;
 	     node = UT_LIST_GET_NEXT(chain, node)) {
-
-		if (!node->is_open()
-		    && !fil_node_open_file(node)) {
+		if (!node->is_open() && !fil_node_open_file(node)) {
 			mutex_exit(&fil_system.mutex);
-			return(false);
+			return false;
 		}
 	}
 
 	mutex_exit(&fil_system.mutex);
-
-	return(true);
+	return true;
 }
 
-/** Close each fil_node_t of a named fil_space_t if open.
-@param[in]	name	Tablespace name */
-void
-fil_space_close(
-	const char*	name)
+/** Close each file. Only invoked on fil_system.temp_space. */
+void fil_space_t::close()
 {
-	if (!fil_system.is_initialised()) {
-		return;
-	}
-
 	mutex_enter(&fil_system.mutex);
+	ut_ad(this == fil_system.temp_space
+	      || srv_operation == SRV_OPERATION_BACKUP
+	      || srv_operation == SRV_OPERATION_RESTORE
+	      || srv_operation == SRV_OPERATION_RESTORE_DELTA);
 
-	fil_space_t*	space = fil_space_get_by_name(name);
-	if (space == NULL) {
-		mutex_exit(&fil_system.mutex);
-		return;
-	}
-
-	for (fil_node_t* node = UT_LIST_GET_FIRST(space->chain);
+	for (fil_node_t* node = UT_LIST_GET_FIRST(chain);
 	     node != NULL;
 	     node = UT_LIST_GET_NEXT(chain, node)) {
-
 		if (node->is_open()) {
 			fil_node_close_file(node);
 		}
