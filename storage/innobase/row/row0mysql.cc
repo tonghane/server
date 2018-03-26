@@ -3178,13 +3178,11 @@ row_discard_tablespace(
 	switch (err) {
 	case DB_IO_ERROR:
 		ib::warn() << "ALTER TABLE " << table->name
-			<< " DISCARD TABLESPACE "
-			" failed to delete file";
+			<< " DISCARD TABLESPACE failed to delete file";
 		break;
 	case DB_TABLESPACE_NOT_FOUND:
 		ib::warn() << "ALTER TABLE " << table->name
-			<< " DISCARD TABLESPACE "
-			" failed to find tablespace";
+			<< " DISCARD TABLESPACE failed to find tablespace";
 		break;
 	case DB_SUCCESS:
 		break;
