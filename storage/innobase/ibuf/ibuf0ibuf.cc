@@ -1153,7 +1153,8 @@ ibuf_page_low(
 		return(FALSE);
 	}
 
-	ut_ad(fil_space_get_type(IBUF_SPACE_ID) == FIL_TYPE_TABLESPACE);
+	compile_time_assert(IBUF_SPACE_ID == 0);
+	ut_ad(fil_system.sys_space->purpose == FIL_TYPE_TABLESPACE);
 
 #ifdef UNIV_DEBUG
 	if (!x_latch) {

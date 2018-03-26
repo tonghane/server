@@ -582,13 +582,6 @@ fil_space_get_latch(
 	ulint	id,
 	ulint*	flags);
 
-/** Gets the type of a file space.
-@param[in]	id	tablespace identifier
-@return file type */
-fil_type_t
-fil_space_get_type(
-	ulint	id);
-
 /** Note that a tablespace has been imported.
 It is initially marked as FIL_TYPE_IMPORT so that no logging is
 done during the import process when the space ID is stamped to each page.
