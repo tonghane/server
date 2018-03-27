@@ -353,43 +353,13 @@ dict_build_table_def_step(
 	que_thr_t*	thr,	/*!< in: query thread */
 	tab_node_t*	node)	/*!< in: table create node */
 {
-	dict_table_t*	table;
-	dtuple_t*	row;
-	dberr_t		err = DB_SUCCESS;
-
-	table = node->table;
+	dict_table_t*	table = node->table;
+	ut_ad(!table->is_temporary());
 
 	trx_t*	trx = thr_get_trx(thr);
 	dict_table_assign_new_id(table, trx);
 
-	err = dict_build_tablespace_for_table(table, node);
-
-	if (err != DB_SUCCESS) {
-		return(err);
-	}
-
-	row = dict_create_sys_tables_tuple(table, node->heap);
-
-	ins_node_set_new_row(node->tab_def, row);
-
-	return(err);
-}
-
-/** Builds a tablespace to contain a table, using file-per-table=1.
-@param[in,out]	table	Table to build in its own tablespace.
-@param[in]	node	Table create node
-@return DB_SUCCESS or error code */
-dberr_t
-dict_build_tablespace_for_table(
-	dict_table_t*	table,
-	tab_node_t*	node)
-{
-	bool		needs_file_per_table;
-
 	ut_ad(mutex_own(&dict_sys->mutex));
-
-	needs_file_per_table
-		= DICT_TF2_FLAG_IS_SET(table, DICT_TF2_USE_FILE_PER_TABLE);
 
 	/* Always set this bit for all new created tables */
 	DICT_TF2_FLAG_SET(table, DICT_TF2_FTS_AUX_HEX_NAME);
@@ -397,8 +367,7 @@ dict_build_tablespace_for_table(
 			DICT_TF2_FLAG_UNSET(table,
 					    DICT_TF2_FTS_AUX_HEX_NAME););
 
-	if (needs_file_per_table) {
-		ut_ad(!dict_table_is_temporary(table));
+	if (DICT_TF2_FLAG_IS_SET(table, DICT_TF2_USE_FILE_PER_TABLE)) {
 		/* This table will need a new tablespace. */
 
 		ut_ad(DICT_TF_GET_ZIP_SSIZE(table->flags) == 0
@@ -414,7 +383,7 @@ dict_build_tablespace_for_table(
 		);
 
 		if (space_id == ULINT_UNDEFINED) {
-			return(DB_ERROR);
+			return DB_ERROR;
 		}
 		table->space = unsigned(space_id);
 
@@ -448,9 +417,7 @@ dict_build_tablespace_for_table(
 		fil_space_t* space = fil_ibd_create(
 			space_id, table->name.m_name, filepath, fsp_flags,
 			FIL_IBD_FILE_INITIAL_SIZE,
-			node ? node->mode : FIL_ENCRYPTION_DEFAULT,
-			node ? node->key_id : FIL_DEFAULT_ENCRYPTION_KEY,
-			&err);
+			node->mode, node->key_id, &err);
 
 		ut_free(filepath);
 
@@ -470,17 +437,14 @@ dict_build_tablespace_for_table(
 	} else {
 		ut_ad(dict_tf_get_rec_format(table->flags)
 		      != REC_FORMAT_COMPRESSED);
-		if (dict_table_is_temporary(table)) {
-			table->space = SRV_TMP_SPACE_ID;
-		} else {
-			ut_ad(table->space == TRX_SYS_SPACE);
-		}
-
+		ut_ad(table->space == TRX_SYS_SPACE);
 		DBUG_EXECUTE_IF("ib_ddl_crash_during_tablespace_alloc",
 				DBUG_SUICIDE(););
 	}
 
-	return(DB_SUCCESS);
+	ins_node_set_new_row(node->tab_def,
+			     dict_create_sys_tables_tuple(table, node->heap));
+	return DB_SUCCESS;
 }
 
 /** Builds a SYS_VIRTUAL row definition to insert.
